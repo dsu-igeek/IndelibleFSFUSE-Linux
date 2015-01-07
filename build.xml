@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="IndelibleFSClient Linux" default="buildJar" basedir=".">
+	<description>
+        Build file for Indelible FS FUSE filesystem for Linux
+  	</description>
+	<import file="../iGeekCommon-Linux/build-common-linux.xml"/>
+	<target name="localProperties">
+		<!-- set global properties for this build -->
+		<property name="nativesrc" location="nativesrc"/>
+		<property name="jarName" value="IndelibleFSFUSE-Linux.jar"/>
+		<property name="testsJarName" value="iIndelibleFSFUSE-LinuxTests.jar"/>
+	</target>
+
+	<target name="setupOtherProjects">
+		<addOtherProject otherProjectName="iGeekCommon-Linux" classPathRefID="localLibs"/>
+		<addOtherProject otherProjectName="IndelibleFSClient-Linux" classPathRefID="localLibs"/>
+		<addOtherProject otherProjectName="IndelibleFSFUSE" classPathRefID="localLibs"/>
+	</target>
+	
+	<target name="buildJar" depends="init, otherBuilds, javaCompile, iGeekBuildCommon.buildJar"/>
+</project>
