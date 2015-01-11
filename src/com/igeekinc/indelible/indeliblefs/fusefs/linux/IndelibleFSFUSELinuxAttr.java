@@ -15,13 +15,14 @@
  */
 package com.igeekinc.indelible.indeliblefs.fusefs.linux;
 
-import java.rmi.RemoteException;
+import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
+import com.igeekinc.indelible.indeliblefs.IndelibleDirectoryNodeIF;
+import com.igeekinc.indelible.indeliblefs.IndelibleFileNodeIF;
+import com.igeekinc.indelible.indeliblefs.exceptions.PermissionDeniedException;
 import com.igeekinc.indelible.indeliblefs.fusefs.IndelibleFSFUSEAttr;
-import com.igeekinc.indelible.indeliblefs.remote.IndelibleDirectoryNodeRemote;
-import com.igeekinc.indelible.indeliblefs.remote.IndelibleFileNodeRemote;
 import com.igeekinc.luwak.inode.exceptions.InodeIOException;
 import com.igeekinc.util.ClientFileMetaDataProperties;
 import com.igeekinc.util.linux.LinuxFileMetaData;
@@ -33,7 +34,7 @@ public class IndelibleFSFUSELinuxAttr extends IndelibleFSFUSEAttr
 {
 
 	
-	public IndelibleFSFUSELinuxAttr(IndelibleFileNodeRemote node, ClientFileMetaDataProperties mdProperties) throws InodeIOException
+	public IndelibleFSFUSELinuxAttr(IndelibleFileNodeIF node, ClientFileMetaDataProperties mdProperties) throws InodeIOException
 	{
 		try
 		{
@@ -50,8 +51,8 @@ public class IndelibleFSFUSELinuxAttr extends IndelibleFSFUSEAttr
 			if (md.getFileType() == LinuxFileMetaData.kDirectoryType)
 			{
 				accessMask |= LinuxOSConstants.S_IFDIR;
-				setSize((((IndelibleDirectoryNodeRemote)node).getNumChildren() + 2) * 512);
-				setNLink(((IndelibleDirectoryNodeRemote)node).getNumChildren() + 2);
+				setSize((((IndelibleDirectoryNodeIF)node).getNumChildren() + 2) * 512);
+				setNLink(((IndelibleDirectoryNodeIF)node).getNumChildren() + 2);
 			}
 			else
 			{
@@ -64,7 +65,11 @@ public class IndelibleFSFUSELinuxAttr extends IndelibleFSFUSEAttr
 			long blocks = (getSize() % 512 != 0) ? getSize() / 512 + 1: getSize()/512;
 			setBlocks(blocks);
 			
-		} catch (RemoteException e)
+		} catch (PermissionDeniedException e)
+		{
+			Logger.getLogger(getClass()).error(new ErrorLogMessage("Caught exception"), e);
+			throw new InodeIOException();
+		} catch (IOException e)
 		{
 			Logger.getLogger(getClass()).error(new ErrorLogMessage("Caught exception"), e);
 			throw new InodeIOException();
